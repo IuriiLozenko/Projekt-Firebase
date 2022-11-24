@@ -1,6 +1,7 @@
 import './../styles/styles.css';
 import { initializeApp } from "firebase/app";
 import { deleteObject, getStorage, listAll, ref, uploadBytes, list, getDownloadURL } from "firebase/storage";
+import { addDoc, collection, doc, getDoc, getDocs, getFirestore, query, setDoc, updateDoc, where } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAGcT0oYRyuEm-VZkGlK6wXA0BD2ftaLEU",
@@ -76,37 +77,109 @@ const storage = getStorage(app);
 
 //TASK 05
 
-function loadImagesList() {
- const storageRef = ref(storage);
- document.body.innerHTML = "";
- listAll(storageRef).then((res) => {
-   res.items.forEach((item) => {
-     const img = document.createElement("img");
-     const div = document.createElement("div");
-     const deleteBtn = document.createElement("button");
-     deleteBtn.innerText = "Delete";
-     deleteBtn.dataset.imageName = item.fullPath;
+// function loadImagesList() {
+//  const storageRef = ref(storage);
+//  document.body.innerHTML = "";
+//  listAll(storageRef).then((res) => {
+//    res.items.forEach((item) => {
+//      const img = document.createElement("img");
+//      const div = document.createElement("div");
+//      const deleteBtn = document.createElement("button");
+//      deleteBtn.innerText = "Delete";
+//      deleteBtn.dataset.imageName = item.fullPath;
 
-     deleteBtn.addEventListener("click", (event) =>{
-       const imageRef = ref(storage, event.target.dataset.imageName);
-       deleteObject(imageRef).then(() =>{
-           loadImagesList();
-       });
-     });
+//      deleteBtn.addEventListener("click", (event) =>{
+//        const imageRef = ref(storage, event.target.dataset.imageName);
+//        deleteObject(imageRef).then(() =>{
+//            loadImagesList();
+//        });
+//      });
 
-     div.classList.add("card");
-     img.classList.add("image");
+//      div.classList.add("card");
+//      img.classList.add("image");
 
 
-     div.appendChild(img);
-     div.appendChild(deleteBtn);
-     document.body.appendChild(div);
+//      div.appendChild(img);
+//      div.appendChild(deleteBtn);
+//      document.body.appendChild(div);
 
-     getDownloadURL(item).then((url) => {
-       img.src = url;
-     });
-   });
- });
-}
+//      getDownloadURL(item).then((url) => {
+//        img.src = url;
+//      });
+//    });
+//  });
+// }
 
-loadImagesList()
+// loadImagesList()
+
+//FIRESTORE(add)
+
+const db = getFirestore(app);
+// const usersCollection = collection(db, "users");
+// addDoc(usersCollection, {
+//     Name: "Juri",
+//     Surname: "Lozenko"
+// });
+//AKTUALIZACJA 
+// const myDoc = doc(db, "users", "NowyUserId" )
+// getDoc(myDoc).then((respData) => {
+//     console.log(respData.data());
+// });
+
+//TASK  Database (Firestore)
+
+// const myName = document.getElementById("myName");
+// const mySurname = document.getElementById("mySurname");
+// const myAge = document.getElementById("myAge");
+// const myBtn = document.getElementById("myBtn");
+// const myUsersList = document.getElementById("myUsersList");
+
+// const usersCollection = collection(db, "users");
+// getDocs(usersCollection).then((docs) => {
+//   docs.forEach((userDoc) => {
+//     const user = userDoc.data();
+//     const listItem = document.createElement("li");
+//     const editBtn = document.createElement("button");
+//     editBtn.innerText = "Edit";
+
+//     editBtn.addEventListener("click", () => {
+//         myName.value = user.Name;
+//         mySurname.value = user.Surname;
+//         myAge.value = user.Age;
+//         myBtn.dataset.userId = userDoc.id;
+//     });
+
+//     listItem.innerText = `${user.Name} ${user.Surname}`;
+//     listItem.appendChild(editBtn);
+//     myUsersList.appendChild(listItem);
+//   });
+// });
+
+// myBtn.addEventListener("click", (event) => {
+//     const myDoc = doc(db, "users", event.target.dataset.userId);
+//     updateDoc(myDoc, {
+//         Name: myName.value,
+//         Surname: mySurname.value,
+//         Age: parseInt(myAge.value)
+//     })   
+// });
+
+// TASK QUERY
+
+const myName = document.getElementById("myName");
+const myBtn = document.getElementById("myBtn");
+const myUsersList = document.getElementById("myUsersList");
+
+myBtn.addEventListener("click", () => {
+  const usersCollection = collection(db, "users");
+  const myQuery = query(usersCollection, where("Name", "==", myName.value));
+  getDocs(myQuery).then((docs) => {
+    myUsersList.innerHTML = "";
+    docs.forEach((userDoc) => {
+      const user = userDoc.data();
+      const listItem = document.createElement("li");
+      listItem.innerText = `${user.Name} ${user.Surname}`;
+      myUsersList.appendChild(listItem);
+    });
+  });
+});
