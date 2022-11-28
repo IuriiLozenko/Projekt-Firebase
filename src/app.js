@@ -1,20 +1,25 @@
 import './../styles/styles.css';
 import { initializeApp } from "firebase/app";
-import { deleteObject, getStorage, listAll, ref, uploadBytes, list, getDownloadURL } from "firebase/storage";
-import { addDoc, collection, doc, getDoc, getDocs, getFirestore, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { deleteObject, getStorage, listAll, ref as storageRef, uploadBytes, list, getDownloadURL } from "firebase/storage";
+import { addDoc, arrayUnion, collection, doc, getDoc, getDocs, getFirestore, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
+import { getDatabase, onValue, push, ref, set } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAGcT0oYRyuEm-VZkGlK6wXA0BD2ftaLEU",
   authDomain: "project-firebase13.firebaseapp.com",
+  databaseURL: "https://project-firebase13-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "project-firebase13",
   storageBucket: "project-firebase13.appspot.com",
   messagingSenderId: "1005958775270",
-  appId: "1:1005958775270:web:b7d92f6522573c604cd627"
+  appId: "1:1005958775270:web:b7d92f6522573c604cd627",
 };
 
 
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
+// const db = getFirestore(app);
+const db = getDatabase();
+
 // TASK 01
 // const myBtn = document.getElementById("mySendBtn");
 // myBtn.addEventListener("click", () => {
@@ -114,7 +119,7 @@ const storage = getStorage(app);
 
 //FIRESTORE(add)
 
-const db = getFirestore(app);
+
 // const usersCollection = collection(db, "users");
 // addDoc(usersCollection, {
 //     Name: "Juri",
@@ -166,20 +171,64 @@ const db = getFirestore(app);
 
 // TASK QUERY
 
-const myName = document.getElementById("myName");
-const myBtn = document.getElementById("myBtn");
-const myUsersList = document.getElementById("myUsersList");
+// const myName = document.getElementById("myName");
+// const myBtn = document.getElementById("myBtn");
+// const myUsersList = document.getElementById("myUsersList");
 
-myBtn.addEventListener("click", () => {
-  const usersCollection = collection(db, "users");
-  const myQuery = query(usersCollection, where("Name", "==", myName.value));
-  getDocs(myQuery).then((docs) => {
-    myUsersList.innerHTML = "";
-    docs.forEach((userDoc) => {
-      const user = userDoc.data();
-      const listItem = document.createElement("li");
-      listItem.innerText = `${user.Name} ${user.Surname}`;
-      myUsersList.appendChild(listItem);
+// myBtn.addEventListener("click", () => {
+//   const usersCollection = collection(db, "users");
+//   const myQuery = query(usersCollection, where("Name", "==", myName.value));
+//   getDocs(myQuery).then((docs) => {
+//     myUsersList.innerHTML = "";
+//     docs.forEach((userDoc) => {
+//       const user = userDoc.data();
+//       const listItem = document.createElement("li");
+//       listItem.innerText = `${user.Name} ${user.Surname}`;
+//       myUsersList.appendChild(listItem);
+//     });
+//   });
+// });
+
+// TASK ACTUAL. and DELETE (FIRESTORE)
+
+// const childrenList = document.getElementById("childrenList");
+// const childNameInput = document.getElementById("childName");
+// const addChildBtn = document.getElementById("addChildBtn");
+// const janKowalskiDoc = doc(db, "users", "JanKowalskiId");
+
+// onSnapshot(janKowalskiDoc, (docRes) => {
+//     childrenList.innerHTML = "";
+//         const janek = docRes.data();
+//         janek.Dzieci.forEach(dziecko => {
+//             const itemDziecko = document.createElement("li");
+//             itemDziecko.innerText = dziecko;
+//             childrenList.appendChild(itemDziecko);
+//             //TUTAJ DODAJ PRZYCISK DELETE
+//             // + EVENT LISTENER NA CLICK
+//         });
+//     });
+// addChildBtn.addEventListener("click", () => {
+//     updateDoc(janKowalskiDoc, {
+//         Dzieci: arrayUnion(childNameInput.value)
+//     });
+// });
+
+// REALTIME DATABASE
+const userName = document.getElementById("userName");
+const userSurname = document.getElementById("userSurname");
+const addUserBtn = document.getElementById("addUserBtn");
+const usersRef = ref(db, "users");
+
+addUserBtn.addEventListener("click", () => {
+    const userRef = push(usersRef);
+set(userRef, {
+  name: userName.value,
+  surname: userSurname.value,
+   });
+});
+
+onValue(usersRef, (snapshot) => {
+    snapshot.forEach(user => {
+        console.log(user.key);
     });
-  });
 });
