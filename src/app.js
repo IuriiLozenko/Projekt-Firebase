@@ -2,7 +2,7 @@ import './../styles/styles.css';
 import { initializeApp } from "firebase/app";
 import { deleteObject, getStorage, listAll, ref as storageRef, uploadBytes, list, getDownloadURL } from "firebase/storage";
 import { addDoc, arrayUnion, collection, doc, getDoc, getDocs, getFirestore, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
-import { getDatabase, onValue, push, ref, set } from "firebase/database";
+import { getDatabase, onChildAdded, onValue, push, ref, remove, set } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAGcT0oYRyuEm-VZkGlK6wXA0BD2ftaLEU",
@@ -214,21 +214,126 @@ const db = getDatabase();
 // });
 
 // REALTIME DATABASE
-const userName = document.getElementById("userName");
-const userSurname = document.getElementById("userSurname");
-const addUserBtn = document.getElementById("addUserBtn");
-const usersRef = ref(db, "users");
+// const userName = document.getElementById("userName");
+// const userSurname = document.getElementById("userSurname");
+// const addUserBtn = document.getElementById("addUserBtn");
+// const usersRef = ref(db, "users");
+// const usersList = document.getElementById("usersList");
 
-addUserBtn.addEventListener("click", () => {
-    const userRef = push(usersRef);
-set(userRef, {
-  name: userName.value,
-  surname: userSurname.value,
-   });
+// addUserBtn.addEventListener("click", () => {
+//     const userRef = push(usersRef);
+// set(userRef, {
+//   name: userName.value,
+//   surname: userSurname.value,
+//    });
+// });
+
+// onValue(usersRef, (snapshot) => {
+//   usersList.innerHTML = "";
+//   snapshot.forEach((userSnapshot) => {
+//     const user = userSnapshot.val();
+//     const listItem = document.createElement("li");
+//     listItem.innerText = `${user.name} ${user.surname}`;
+
+//     const removeBtn = document.createElement("button");
+//     removeBtn.innerText = "Remove";
+//     removeBtn.addEventListener("click", () => {
+//         remove(userSnapshot.ref);
+//     });
+//     listItem.appendChild(removeBtn);
+
+//     usersList.appendChild(listItem);
+//   });
+// });
+
+// TASK 03 REALTIME DATABASE
+
+// const fakeDoc = document.getElementById("fakeDoc");
+// const docRef = ref(db, "doc");
+// fakeDoc.addEventListener("input", () => {
+//     set(docRef, {
+//         text: fakeDoc.value
+//     });
+// });
+
+// onValue(docRef, (snapshot) => {
+//     const docObj = snapshot.val();
+//     if(fakeDoc.value !== docObj.text){
+//         fakeDoc.value = docObj.text;
+//     }
+// });
+
+const usernameInput = document.getElementById("username");
+const usercolorInput = document.getElementById("usercolor");
+const adduserBtn = document.getElementById("adduser");
+const userSelect = document.getElementById("userselect");
+const selectedUserHeader = document.getElementById("selecteduser");
+const messageInput = document.getElementById("message");
+const sendMessageBtn = document.getElementById("sendmessage");
+const messagesDiv = document.getElementById("messages");
+let selectedUser = {};
+const messagesRef = ref(db, "messages");
+
+onChildAdded(messagesRef, (messageSnapshot) => {
+  const message = messageSnapshot.val();
+
+  const messageDiv = document.createElement("div");
+  const textSpan = document.createElement("span");
+  const authorSpan = document.createElement("span");
+  const dateSpan = document.createElement("span");
+
+  textSpan.innerText = message.text;
+  authorSpan.innerText = message.createdBy;
+  dateSpan.innerText = message.createdAt;
+
+  messageDiv.appendChild(textSpan);
+  messageDiv.appendChild(authorSpan);
+  messageDiv.appendChild(dateSpan);
+  messageDiv.style.backgroundColor = message.color;
+  messageDiv.classList.add("message");
+
+  messagesDiv.appendChild(messageDiv);
 });
 
+sendMessageBtn.addEventListener("click", () => {
+  const message = {
+    text: messageInput.value,
+    createdAt: new Date().toISOString(),
+    createdBy: selectedUser.username,
+    color: selectedUser.color,
+  };
+
+  const messageRef = push(messagesRef);
+  set(messageRef, message);
+});
+
+adduserBtn.addEventListener("click", () => {
+  const userRef = ref(db, `users/${usernameInput.value}`);
+  set(userRef, {
+    color: usercolorInput.value,
+  });
+});
+
+userSelect.addEventListener("change", () => {
+  selectedUser = {
+    username: userSelect.value,
+    color: userSelect.selectedOptions[0].dataset.color,
+  };
+  selectedUserHeader.innerText = userSelect.value;
+  selectedUserHeader.style.color = userSelect.selectedOptions[0].dataset.color;
+});
+
+const usersRef = ref(db, "users");
 onValue(usersRef, (snapshot) => {
-    snapshot.forEach(user => {
-        console.log(user.key);
-    });
+  userSelect.innerHTML = "";
+  const emptyOption = document.createElement("option");
+  userSelect.appendChild(emptyOption);
+
+  snapshot.forEach((userSnapshot) => {
+    const user = userSnapshot.val();
+    const option = document.createElement("option");
+    option.innerText = userSnapshot.key;
+    option.dataset.color = user.color;
+    userSelect.appendChild(option);
+  });
 });
