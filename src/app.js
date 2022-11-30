@@ -3,6 +3,8 @@ import { initializeApp } from "firebase/app";
 import { deleteObject, getStorage, listAll, ref as storageRef, uploadBytes, list, getDownloadURL } from "firebase/storage";
 import { addDoc, arrayUnion, collection, doc, getDoc, getDocs, getFirestore, onSnapshot, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { getDatabase, onChildAdded, onValue, push, ref, remove, set } from "firebase/database";
+import { getAuth, EmailAuthProvider, onAuthStateChanged, signOut, updateProfile, GoogleAuthProvider } from "firebase/auth";
+import * as firebaseui from "firebaseui";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAGcT0oYRyuEm-VZkGlK6wXA0BD2ftaLEU",
@@ -14,11 +16,11 @@ const firebaseConfig = {
   appId: "1:1005958775270:web:b7d92f6522573c604cd627",
 };
 
-
+//Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
-// const db = getFirestore(app);
-const db = getDatabase();
+const db = getFirestore(app);
+// const db = getDatabase();
 
 // TASK 01
 // const myBtn = document.getElementById("mySendBtn");
@@ -263,77 +265,154 @@ const db = getDatabase();
 //     }
 // });
 
-const usernameInput = document.getElementById("username");
-const usercolorInput = document.getElementById("usercolor");
-const adduserBtn = document.getElementById("adduser");
-const userSelect = document.getElementById("userselect");
-const selectedUserHeader = document.getElementById("selecteduser");
-const messageInput = document.getElementById("message");
-const sendMessageBtn = document.getElementById("sendmessage");
-const messagesDiv = document.getElementById("messages");
-let selectedUser = {};
-const messagesRef = ref(db, "messages");
+//TASK REALTIME DATABASE
 
-onChildAdded(messagesRef, (messageSnapshot) => {
-  const message = messageSnapshot.val();
+// const usernameInput = document.getElementById("username");
+// const usercolorInput = document.getElementById("usercolor");
+// const adduserBtn = document.getElementById("adduser");
+// const userSelect = document.getElementById("userselect");
+// const selectedUserHeader = document.getElementById("selecteduser");
+// const messageInput = document.getElementById("message");
+// const sendMessageBtn = document.getElementById("sendmessage");
+// const messagesDiv = document.getElementById("messages");
+// let selectedUser = {};
+// const messagesRef = ref(db, "messages");
 
-  const messageDiv = document.createElement("div");
-  const textSpan = document.createElement("span");
-  const authorSpan = document.createElement("span");
-  const dateSpan = document.createElement("span");
+// onChildAdded(messagesRef, (messageSnapshot) => {
+//   const message = messageSnapshot.val();
 
-  textSpan.innerText = message.text;
-  authorSpan.innerText = message.createdBy;
-  dateSpan.innerText = message.createdAt;
+//   const messageDiv = document.createElement("div");
+//   const textSpan = document.createElement("span");
+//   const authorSpan = document.createElement("span");
+//   const dateSpan = document.createElement("span");
 
-  messageDiv.appendChild(textSpan);
-  messageDiv.appendChild(authorSpan);
-  messageDiv.appendChild(dateSpan);
-  messageDiv.style.backgroundColor = message.color;
-  messageDiv.classList.add("message");
+//   textSpan.innerText = message.text;
+//   authorSpan.innerText = message.createdBy;
+//   dateSpan.innerText = message.createdAt;
 
-  messagesDiv.appendChild(messageDiv);
+//   messageDiv.appendChild(textSpan);
+//   messageDiv.appendChild(authorSpan);
+//   messageDiv.appendChild(dateSpan);
+//   messageDiv.style.backgroundColor = message.color;
+//   messageDiv.classList.add("message");
+
+//   messagesDiv.appendChild(messageDiv);
+// });
+
+// sendMessageBtn.addEventListener("click", () => {
+//   const message = {
+//     text: messageInput.value,
+//     createdAt: new Date().toISOString(),
+//     createdBy: selectedUser.username,
+//     color: selectedUser.color,
+//   };
+
+//   const messageRef = push(messagesRef);
+//   set(messageRef, message);
+// });
+
+// adduserBtn.addEventListener("click", () => {
+//   const userRef = ref(db, `users/${usernameInput.value}`);
+//   set(userRef, {
+//     color: usercolorInput.value,
+//   });
+// });
+
+// userSelect.addEventListener("change", () => {
+//   selectedUser = {
+//     username: userSelect.value,
+//     color: userSelect.selectedOptions[0].dataset.color,
+//   };
+//   selectedUserHeader.innerText = userSelect.value;
+//   selectedUserHeader.style.color = userSelect.selectedOptions[0].dataset.color;
+// });
+
+// const usersRef = ref(db, "users");
+// onValue(usersRef, (snapshot) => {
+//   userSelect.innerHTML = "";
+//   const emptyOption = document.createElement("option");
+//   userSelect.appendChild(emptyOption);
+
+//   snapshot.forEach((userSnapshot) => {
+//     const user = userSnapshot.val();
+//     const option = document.createElement("option");
+//     option.innerText = userSnapshot.key;
+//     option.dataset.color = user.color;
+//     userSelect.appendChild(option);
+//   });
+// });
+
+//Authentication.
+
+const auth = getAuth(app);
+
+
+const loginHeader = document.getElementById("loginHeader");
+const buttonSignOut = document.getElementById("signOutButton");
+const profilePhotoInput = document.getElementById("profilePhotoInput");
+const sendPhotoBtn = document.getElementById("sendPhoto");
+const photoProfileImg = document.getElementById("profilePhoto");
+const addressInput = document.getElementById("address");
+const motherNameInput = document.getElementById("motherName");
+const salary = document.getElementById("salary");
+const phoneNumber = document.getElementById("phoneNumber");
+const updateBtn = document.getElementById("updateBtn");
+
+buttonSignOut.addEventListener("click", () => {
+    signOut(auth);
 });
 
-sendMessageBtn.addEventListener("click", () => {
-  const message = {
-    text: messageInput.value,
-    createdAt: new Date().toISOString(),
-    createdBy: selectedUser.username,
-    color: selectedUser.color,
-  };
-
-  const messageRef = push(messagesRef);
-  set(messageRef, message);
-});
-
-adduserBtn.addEventListener("click", () => {
-  const userRef = ref(db, `users/${usernameInput.value}`);
-  set(userRef, {
-    color: usercolorInput.value,
+updateBtn.addEventListener("click", () => {
+  const docRef = doc(db, `users/${auth.currentUser.uid}`);
+  setDoc(docRef, {
+    address: addressInput.value,
+    motherName: motherNameInput.value,
+    salary: salary.value,
+    phoneNumber: phoneNumber.value,
   });
 });
 
-userSelect.addEventListener("change", () => {
-  selectedUser = {
-    username: userSelect.value,
-    color: userSelect.selectedOptions[0].dataset.color,
-  };
-  selectedUserHeader.innerText = userSelect.value;
-  selectedUserHeader.style.color = userSelect.selectedOptions[0].dataset.color;
+
+sendPhotoBtn.addEventListener("click", async () => {
+  const file = profilePhotoInput.files[0];
+  const fileRef = storageRef(storage, `${auth.currentUser.uid}/${file.name}`);
+  const _ = await uploadBytes(fileRef, file);
+  const url = await getDownloadURL(fileRef);
+  updateProfile(auth.currentUser, {
+    photoURL: url,
+  });
 });
 
-const usersRef = ref(db, "users");
-onValue(usersRef, (snapshot) => {
-  userSelect.innerHTML = "";
-  const emptyOption = document.createElement("option");
-  userSelect.appendChild(emptyOption);
 
-  snapshot.forEach((userSnapshot) => {
-    const user = userSnapshot.val();
-    const option = document.createElement("option");
-    option.innerText = userSnapshot.key;
-    option.dataset.color = user.color;
-    userSelect.appendChild(option);
-  });
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        loginHeader.innerText = `Witaj ${user.displayName}!`;
+        photoProfileImg.src = user.photoURL;
+        buttonSignOut.classList.remove("hidden");
+        profilePhotoInput.classList.remove("hidden");
+        sendPhotoBtn.classList.remove("hidden");
+        photoProfileImg.classList.remove("hidden");
+    }
+    else {
+        loginHeader.innerText = "Zaloguj się! Dziadu!";
+        buttonSignOut.classList.add("hidden");
+        profilePhotoInput.classList.remove("hidden");
+        sendPhotoBtn.classList.remove("hidden");
+        photoProfileImg.classList.remove("hidden");
+
+        const ui = new firebaseui.auth.AuthUI(auth);
+        ui.start('#firebaseui-auth-container', {
+            callbacks: {
+                signInSuccessWithAuthResult: (authResult, redirectUrl) => {
+                    console.log(authResult);
+                    console.log(redirectUrl);
+                }
+            },
+            signInOptions: [
+                EmailAuthProvider.PROVIDER_ID,
+                GoogleAuthProvider.PROVIDER_ID,
+            ],
+            signInSuccessUrl: "http://localhost:8080/"
+        });
+    };
 });

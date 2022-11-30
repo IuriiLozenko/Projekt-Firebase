@@ -19,3 +19,14 @@
     flex-direction: column;
     align-items: flex-start;
 }
+
+.hidden {
+    display: none;
+}
+
+.profile-photo {
+    height: 50px;
+    width: 50px;
+    border-radius: 50%;
+    
+}
