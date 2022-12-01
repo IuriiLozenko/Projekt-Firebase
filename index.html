@@ -33,22 +33,43 @@
         <h1 id="selecteduser"></h1>
         <input id="message">
         <button id="sendmessage">Send message</button>
-        <div id="messages"></div>-->
-        
+        <div id="messages"></div>
+
         <div id="firebaseui-auth-container"></div> 
         <h1 id="loginHeader"></h1>
         <button id="signOutButton" class="hidden">Wyloguj!</button>
         <input id="profilePhotoInput" type="file" class="hidden">
         <button id="sendPhoto" class="hidden">Dodaj profilowe</button>
         <img class="hidden profile-photo" id="profilePhoto" >
-
         <input id="address">
         <input id="motherName">
         <input id="salary">
         <input id="phoneNumber">
-        <button id="updateBtn">Aktualizuj</button>
+        <button id="updateBtn">Aktualizuj</button>-->
+
+         <div id="firebaseui-auth-container"></div> 
+        <div id="container" class="hidden">
+            <div id="noteForm">
+                <div class="form-group">
+                    <label>Tytuł</label>
+                    <input id="noteTitle">
+                </div>
+                <div class="form-group">
+                    <label>Notatka</label>
+                    <textarea id="noteText"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Miniaturka</label>
+                    <input id="noteThumbnail" type="file">
+                    <img id="previewThumbnail">
+                </div>
+                <div class="form-group">
+                    <button id="saveBtn">Zapisz</button>
+                </div>
+            </div>
+            <div id="notesList">
+
+            </div>
+        </div>
     </body>
-</html>
-    </body>
-   </body>
 </html>
