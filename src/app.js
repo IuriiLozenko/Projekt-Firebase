@@ -495,7 +495,7 @@ onAuthStateChanged(auth, (user) => {
     container.classList.remove("hidden");
     displayNotes();
   } else {
-    container.classList.add("hidden");bas
+    container.classList.add("hidden");
     const ui = new firebaseui.auth.AuthUI(auth);
     ui.start("#firebaseui-auth-container", {
       signInOptions: [EmailAuthProvider.PROVIDER_ID],
